@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoltIQ - Open Energy Discovery Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-shell">
+    <div class="bg-glow glow-one"></div>
+    <div class="bg-glow glow-two"></div>
+  </div>
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark">VI</div>
+      <div>
+        <div class="brand-name">VoltIQ</div>
+        <div class="brand-sub">Open Energy Discovery Platform</div>
+      </div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-tab="calculator" onclick="showTab('calculator')">Calculator</button>
+      <button class="nav-btn" data-tab="compare" onclick="showTab('compare')">Compare</button>
+      <button class="nav-btn" data-tab="solar" onclick="showTab('solar')">Solar ROI</button>
+      <button class="nav-btn" data-tab="discover" onclick="showTab('discover')">Discover</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <section id="tab-calculator" class="tab active">
+      <div class="section-hero">
+        <div class="eyebrow">Climate-Tech Billing Intelligence</div>
+        <h1>Model Your Real Energy Cost</h1>
+        <p class="hero-copy">Calculate electricity bills, test solar payback, and understand subsidy eligibility with a clean utility dashboard.</p>
+      </div>
+
+      <div class="calc-layout">
+        <div class="card input-panel">
+          <div class="panel-title">Your Inputs</div>
+
+          <div class="form-group">
+            <label for="state">State</label>
+            <select id="state" onchange="updateCategories()">
+              <option value="Gujarat">Gujarat</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Delhi">Delhi</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Consumer Category</label>
+            <select id="category"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="units">Monthly Consumption</label>
+            <div class="input-wrap">
+              <input type="number" id="units" placeholder="Enter units" min="1" max="10000">
+              <span class="input-unit">kWh</span>
+            </div>
+          </div>
+
+          <div class="form-group split">
+            <div>
+              <label for="system_kw">Solar Size</label>
+              <div class="input-wrap">
+                <input type="number" id="system_kw" value="3" min="1" max="50">
+                <span class="input-unit">kW</span>
+              </div>
+            </div>
+            <div>
+              <label for="system_type">System Type</label>
+              <select id="system_type" onchange="updateSubsidyWarning()">
+                <option value="on_grid">On-Grid</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="off_grid">Off-Grid</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="subsidy-warning" class="subsidy-warning hidden">
+            Government subsidy is only available for grid-connected rooftop solar systems.
+          </div>
+
+          <button id="calculate-btn" class="btn-primary" onclick="calculate()">Calculate Bill</button>
+          <div id="error-msg" class="error-msg hidden"></div>
+        </div>
+
+        <div id="results-panel" class="results-panel hidden">
+          <div class="card result-hero-card">
+            <div class="result-hero-top">
+              <div>
+                <div class="result-label">Total Estimated Bill</div>
+                <div class="result-amount" id="res-total">Rs 0</div>
+              </div>
+              <div class="result-badge" id="res-system-type">on-grid</div>
+            </div>
+            <div class="utility-line" id="res-utility"></div>
+
+            <div class="result-grid">
+              <div class="result-tile">
+                <span class="tile-label">Solar Net Cost</span>
+                <span class="tile-value" id="res-solar">Rs 0</span>
+              </div>
+              <div class="result-tile">
+                <span class="tile-label">Monthly Savings</span>
+                <span class="tile-value" id="res-savings">Rs 0</span>
+              </div>
+              <div class="result-tile">
+                <span class="tile-label">Government Subsidy</span>
+                <span class="tile-value" id="res-subsidy">Rs 0</span>
+              </div>
+              <div class="result-tile">
+                <span class="tile-label">CO2 Impact</span>
+                <span class="tile-value" id="res-co2">0 kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bill-card">
+            <div class="panel-title">Bill Breakdown</div>
+            <div class="bill-breakdown" id="bill-breakdown"></div>
+            <div class="result-note" id="res-solar-message"></div>
+          </div>
+
+          <div class="card solar-card">
+            <div class="panel-title">Solar and Environment</div>
+            <div class="solar-grid" id="solar-snapshot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-compare" class="tab">
+      <div class="section-head">
+        <div class="eyebrow">Cross-State Cost View</div>
+        <h2>Compare Tariffs Across States</h2>
+      </div>
+
+      <div class="card compare-header">
+        <div class="form-group compare-input">
+          <label for="compare-units">Monthly Units to Compare</label>
+          <div class="input-wrap">
+            <input type="number" id="compare-units" value="200" min="1" max="5000">
+            <span class="input-unit">kWh</span>
+          </div>
+        </div>
+        <button class="btn-primary compare-btn" onclick="compareStates()">Compare All States</button>
+      </div>
+
+      <div id="compare-results" class="compare-grid hidden"></div>
+    </section>
+
+    <section id="tab-solar" class="tab">
+      <div class="section-head">
+        <div class="eyebrow">Rooftop Economics</div>
+        <h2>Solar ROI Snapshot</h2>
+      </div>
+      <div id="solar-full" class="solar-full hidden"></div>
+    </section>
+
+    <section id="tab-discover" class="tab">
+      <div class="section-head">
+        <div class="eyebrow">Opportunity Layer</div>
+        <h2>Discover Energy Services</h2>
+      </div>
+
+      <div class="discover-grid">
+        <div class="discover-card">
+          <div class="discover-tag">Subsidy</div>
+          <h3>PM Surya Ghar</h3>
+          <p>Government support for on-grid rooftop solar with capped subsidy benefits and faster household payback.</p>
+        </div>
+        <div class="discover-card dark">
+          <div class="discover-tag">Green Power</div>
+          <h3>Renewable Choice</h3>
+          <p>Understand green surcharge impact while evaluating cleaner electricity procurement options.</p>
+        </div>
+        <div class="discover-card">
+          <div class="discover-tag">Storage</div>
+          <h3>Hybrid + Backup</h3>
+          <p>Explore resilience-focused systems where subsidy may not apply, but backup value is stronger.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

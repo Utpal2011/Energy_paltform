@@ -1,0 +1,209 @@
+{
+  "Gujarat": {
+    "utility": "Torrent Power Limited (Surat)",
+    "regulator": "GERC",
+    "effective_date": "2025-04-01",
+    "categories": {
+      "Residential (RGP)": {
+        "fixed_charge": 25,
+        "slabs": [
+          { "limit": 50, "rate": 3.2, "label": "0-50 units" },
+          { "limit": 50, "rate": 3.65, "label": "51-100 units" },
+          { "limit": 150, "rate": 4.25, "label": "101-250 units" },
+          { "limit": 9999, "rate": 5.05, "label": "Above 250 units" }
+        ],
+        "fppas": 2.3,
+        "electricity_duty_pct": 0.05
+      },
+      "Commercial (Non-RGP)": {
+        "fixed_charge": 70,
+        "slabs": [
+          { "limit": 9999, "rate": 4.35, "label": "All units" }
+        ],
+        "fppas": 2.3,
+        "electricity_duty_pct": 0.15
+      },
+      "Agricultural (AGP)": {
+        "fixed_charge": 20,
+        "slabs": [
+          { "limit": 9999, "rate": 0.6, "label": "All units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0
+      }
+    },
+    "solar": {
+      "net_metering": true,
+      "max_capacity_kw": 1000,
+      "export_rate": 2.25,
+      "avg_sun_hours": 5.5,
+      "cost_per_kw": 55000,
+      "subsidy_pct": 0.4,
+      "subsidy_max_kw": 3,
+      "panel_life_years": 25
+    },
+    "green_power_surcharge": 0.9
+  },
+  "Maharashtra": {
+    "utility": "MSEDCL (Mahavitaran)",
+    "regulator": "MERC",
+    "effective_date": "2024-04-01",
+    "categories": {
+      "Residential (BPL)": {
+        "fixed_charge": 0,
+        "slabs": [
+          { "limit": 30, "rate": 0, "label": "0-30 units (free)" },
+          { "limit": 9999, "rate": 3.77, "label": "Above 30 units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0
+      },
+      "Residential": {
+        "fixed_charge": 130,
+        "slabs": [
+          { "limit": 100, "rate": 4.07, "label": "0-100 units" },
+          { "limit": 200, "rate": 6.07, "label": "101-300 units" },
+          { "limit": 9999, "rate": 8.15, "label": "Above 300 units" }
+        ],
+        "fppas": 1.94,
+        "electricity_duty_pct": 0.16
+      },
+      "Commercial (LT-II)": {
+        "fixed_charge": 250,
+        "slabs": [
+          { "limit": 9999, "rate": 9.87, "label": "All units" }
+        ],
+        "fppas": 1.94,
+        "electricity_duty_pct": 0.16
+      }
+    },
+    "solar": {
+      "net_metering": true,
+      "max_capacity_kw": 1000,
+      "export_rate": 2.1,
+      "avg_sun_hours": 4.8,
+      "cost_per_kw": 58000,
+      "subsidy_pct": 0.4,
+      "subsidy_max_kw": 3,
+      "panel_life_years": 25
+    },
+    "green_power_surcharge": 0.5
+  },
+  "Uttar Pradesh": {
+    "utility": "PVVNL / DVVNL / PuVVNL / MVVNL",
+    "regulator": "UPERC",
+    "effective_date": "2024-04-01",
+    "categories": {
+      "Residential (LMV-1)": {
+        "fixed_charge": 110,
+        "slabs": [
+          { "limit": 150, "rate": 3.35, "label": "0-150 units" },
+          { "limit": 150, "rate": 5.5, "label": "151-300 units" },
+          { "limit": 9999, "rate": 6.5, "label": "Above 300 units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.05
+      },
+      "Commercial (LMV-2)": {
+        "fixed_charge": 175,
+        "slabs": [
+          { "limit": 9999, "rate": 7.3, "label": "All units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.05
+      },
+      "Agricultural (LMV-6)": {
+        "fixed_charge": 60,
+        "slabs": [
+          { "limit": 9999, "rate": 1.55, "label": "All units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0
+      }
+    },
+    "solar": {
+      "net_metering": true,
+      "max_capacity_kw": 500,
+      "export_rate": 1.95,
+      "avg_sun_hours": 4.5,
+      "cost_per_kw": 52000,
+      "subsidy_pct": 0.4,
+      "subsidy_max_kw": 3,
+      "panel_life_years": 25
+    },
+    "green_power_surcharge": 0.25
+  },
+  "Rajasthan": {
+    "utility": "JVVNL / AVVNL / JDVVNL",
+    "regulator": "RERC",
+    "effective_date": "2024-04-01",
+    "categories": {
+      "Residential": {
+        "fixed_charge": 100,
+        "slabs": [
+          { "limit": 50, "rate": 3.45, "label": "0-50 units" },
+          { "limit": 100, "rate": 4.75, "label": "51-150 units" },
+          { "limit": 9999, "rate": 6, "label": "Above 150 units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.08
+      },
+      "Commercial": {
+        "fixed_charge": 200,
+        "slabs": [
+          { "limit": 9999, "rate": 7.4, "label": "All units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.08
+      }
+    },
+    "solar": {
+      "net_metering": true,
+      "max_capacity_kw": 1000,
+      "export_rate": 2.4,
+      "avg_sun_hours": 6,
+      "cost_per_kw": 50000,
+      "subsidy_pct": 0.4,
+      "subsidy_max_kw": 3,
+      "panel_life_years": 25
+    },
+    "green_power_surcharge": 0.3
+  },
+  "Delhi": {
+    "utility": "BSES Rajdhani / BSES Yamuna / Tata Power Delhi",
+    "regulator": "DERC",
+    "effective_date": "2024-04-01",
+    "categories": {
+      "Residential (LCA-1)": {
+        "fixed_charge": 125,
+        "slabs": [
+          { "limit": 200, "rate": 3, "label": "0-200 units" },
+          { "limit": 200, "rate": 4.5, "label": "201-400 units" },
+          { "limit": 200, "rate": 6.5, "label": "401-600 units" },
+          { "limit": 9999, "rate": 7, "label": "Above 600 units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.05
+      },
+      "Commercial (LCA-2)": {
+        "fixed_charge": 200,
+        "slabs": [
+          { "limit": 9999, "rate": 8.5, "label": "All units" }
+        ],
+        "fppas": 0,
+        "electricity_duty_pct": 0.05
+      }
+    },
+    "solar": {
+      "net_metering": true,
+      "max_capacity_kw": 500,
+      "export_rate": 3,
+      "avg_sun_hours": 4.5,
+      "cost_per_kw": 60000,
+      "subsidy_pct": 0.4,
+      "subsidy_max_kw": 3,
+      "panel_life_years": 25
+    },
+    "green_power_surcharge": 0.5
+  }
+}
