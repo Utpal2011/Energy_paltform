@@ -28,6 +28,10 @@ MAX_REQUEST_BYTES = 16 * 1024
 # largest band first. Battery cost is never subsidised.
 SUBSIDY_BANDS = [(3, 78000), (2, 60000), (1, 30000)]
 SUBSIDY_ELIGIBLE_TYPES = {"on_grid", "hybrid"}
+# A tariff category is residential when its name contains this keyword,
+# case-insensitive (e.g. "Residential (RGP)", "Residential (BPL)").
+# tariffs.json has no category-type field, so a residential category must
+# keep "Residential" in its name; a name like "Non-Residential" would match.
 SUBSIDY_CATEGORY_KEYWORD = "residential"
 
 # Surplus can be sold to the grid only by grid-tied systems, and only
