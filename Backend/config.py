@@ -1,0 +1,18 @@
+"""Tunable assumptions used by the VoltIQ calculations.
+
+Tariff data lives in tariffs.json; values here are modelling assumptions
+that apply to every state.
+"""
+
+# Environment
+CO2_KG_PER_KWH = 0.82  # Indian grid emission factor (CEA baseline)
+CO2_KG_PER_TREE = 21.7  # CO2 absorbed by one mature tree per year
+
+# Solar generation
+DAYS_PER_MONTH = 30
+
+# /compare uses one fixed system size for every state
+COMPARE_SYSTEM_KW = 3
+
+# Payback reported when savings never recover the system cost
+NO_PAYBACK_YEARS = 99

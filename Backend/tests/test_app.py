@@ -39,3 +39,15 @@ def test_frontend_served_from_root(client):
 
     assert response.status_code == 200
     assert b"VoltIQ" in response.data
+
+
+def test_environment_factors_come_from_config(client, payload, monkeypatch):
+    import config
+
+    monkeypatch.setattr(config, "CO2_KG_PER_KWH", 1.0)
+    monkeypatch.setattr(config, "CO2_KG_PER_TREE", 20.0)
+
+    data = client.post("/calculate", json=payload).get_json()
+
+    assert data["environment"]["co2_kg"] == 200.0
+    assert data["environment"]["trees_equivalent"] == 10.0

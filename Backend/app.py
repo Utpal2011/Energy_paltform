@@ -3,6 +3,8 @@ from flask_cors import CORS
 import json
 from pathlib import Path
 
+import config
+
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "Frontend"
 
@@ -71,7 +73,7 @@ def calculate_subsidy(system_kw):
 def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
     solar = tariffs[state]["solar"]
     avg_sun_hours = solar["avg_sun_hours"]
-    monthly_generation = system_kw * avg_sun_hours * 30
+    monthly_generation = system_kw * avg_sun_hours * config.DAYS_PER_MONTH
 
     cost_per_kw = solar["cost_per_kw"]
     gross_cost = system_kw * cost_per_kw
@@ -99,7 +101,11 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
 
     monthly_savings = round(bill_without_solar - bill_with_solar + export_income, 2)
     annual_savings = round(monthly_savings * 12, 2)
-    payback_years = round(net_cost / annual_savings, 1) if annual_savings > 0 else 99
+    payback_years = (
+        round(net_cost / annual_savings, 1)
+        if annual_savings > 0
+        else config.NO_PAYBACK_YEARS
+    )
     lifetime_savings = round(
         annual_savings * solar["panel_life_years"] - net_cost, 2
     )
@@ -116,7 +122,7 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "lifetime_savings": lifetime_savings,
         "export_income": export_income,
         "export_rate": solar["export_rate"],
-        "co2_saved_kg_monthly": round(monthly_generation * 0.82, 2),
+        "co2_saved_kg_monthly": round(monthly_generation * config.CO2_KG_PER_KWH, 2),
         "net_metering": solar["net_metering"],
         "avg_sun_hours": avg_sun_hours,
         "recommendation": "on-grid" if solar["net_metering"] else "hybrid",
@@ -167,7 +173,7 @@ def calculate():
     bill = calculate_bill(units, state, category)
     solar = solar_analysis(units, state, category, system_kw, system_type)
     green_power_surcharge = round(units * tariffs[state]["green_power_surcharge"], 2)
-    co2_kg = round(units * 0.82, 2)
+    co2_kg = round(units * config.CO2_KG_PER_KWH, 2)
 
     return jsonify(
         {
@@ -188,7 +194,7 @@ def calculate():
             },
             "environment": {
                 "co2_kg": co2_kg,
-                "trees_equivalent": round(co2_kg / 21.7, 1),
+                "trees_equivalent": round(co2_kg / config.CO2_KG_PER_TREE, 1),
             },
             "utility_info": {
                 "name": tariffs[state]["utility"],
@@ -215,7 +221,7 @@ def compare():
 
         category = next(iter(tariffs[state]["categories"]))
         bill = calculate_bill(units, state, category)
-        solar = solar_analysis(units, state, category, 3)
+        solar = solar_analysis(units, state, category, config.COMPARE_SYSTEM_KW)
         comparison.append(
             {
                 "state": state,
