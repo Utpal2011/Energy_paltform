@@ -27,3 +27,7 @@ MAX_REQUEST_BYTES = 16 * 1024
 SUBSIDY_BANDS = [(3, 78000), (2, 60000), (1, 30000)]
 SUBSIDY_ELIGIBLE_TYPES = {"on_grid", "hybrid"}
 SUBSIDY_CATEGORY_KEYWORD = "residential"
+
+# Surplus can be sold to the grid only by grid-tied systems, and only
+# where the state allows net metering.
+EXPORT_ELIGIBLE_TYPES = {"on_grid", "hybrid"}

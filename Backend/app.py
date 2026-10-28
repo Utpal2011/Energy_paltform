@@ -121,7 +121,12 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
 
     self_consumed = min(units, monthly_generation)
     surplus_units = max(0, monthly_generation - units)
-    export_income = round(surplus_units * solar["export_rate"], 2)
+    export_allowed = (
+        solar["net_metering"] and system_type in config.EXPORT_ELIGIBLE_TYPES
+    )
+    export_income = (
+        round(surplus_units * solar["export_rate"], 2) if export_allowed else 0
+    )
 
     bill_without_solar = calculate_bill(units, state, category)["total_bill"]
     bill_with_solar = calculate_bill(
@@ -150,6 +155,7 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "payback_years": payback_years,
         "lifetime_savings": lifetime_savings,
         "export_income": export_income,
+        "export_allowed": export_allowed,
         "export_rate": solar["export_rate"],
         "co2_saved_kg_monthly": round(monthly_generation * config.CO2_KG_PER_KWH, 2),
         "net_metering": solar["net_metering"],
