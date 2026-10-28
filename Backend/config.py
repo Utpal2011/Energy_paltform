@@ -16,3 +16,8 @@ COMPARE_SYSTEM_KW = 3
 
 # Payback reported when savings never recover the system cost
 NO_PAYBACK_YEARS = 99
+
+# Request limits
+MAX_UNITS = 100000  # kWh per month
+MAX_COMPARE_STATES = 50
+MAX_REQUEST_BYTES = 16 * 1024

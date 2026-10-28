@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
+import math
 from pathlib import Path
 
 import config
@@ -10,10 +11,28 @@ FRONTEND_DIR = BASE_DIR.parent / "Frontend"
 
 # Serve the Frontend folder from the site root, so the whole app runs on one port.
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
+app.config["MAX_CONTENT_LENGTH"] = config.MAX_REQUEST_BYTES
 CORS(app)
 
 with open(BASE_DIR / "tariffs.json", encoding="utf-8") as f:
     tariffs = json.load(f)
+
+
+def parse_number(value, name, integer=False, maximum=None):
+    """Return (number, None) for a finite positive number, else (None, error)."""
+    if isinstance(value, bool):
+        return None, f"{name} must be a number"
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None, f"{name} must be a number"
+    if not math.isfinite(number) or number <= 0:
+        return None, f"{name} must be a positive number"
+    if integer and not number.is_integer():
+        return None, f"{name} must be a whole number"
+    if maximum is not None and number > maximum:
+        return None, f"{name} must be at most {maximum}"
+    return (int(number) if integer else number), None
 
 
 def calculate_bill(units, state, category):
@@ -152,22 +171,39 @@ def get_states():
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
-    data = request.get_json(silent=True) or {}
-    units = int(data.get("units", 0))
-    state = data.get("state", "Gujarat")
-    system_kw = float(data.get("system_kw", 3))
-    system_type = data.get("system_type", "on_grid")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Request body must be a JSON object"}), 400
 
-    if units <= 0:
-        return jsonify({"error": "Units must be positive"}), 400
-    if state not in tariffs:
+    units, error = parse_number(
+        data.get("units"), "units", integer=True, maximum=config.MAX_UNITS
+    )
+    if error:
+        return jsonify({"error": error}), 400
+
+    state = data.get("state", "Gujarat")
+    if not isinstance(state, str) or state not in tariffs:
         return jsonify({"error": "State not found"}), 404
-    if system_type not in {"on_grid", "hybrid", "off_grid"}:
+
+    system_type = data.get("system_type", "on_grid")
+    if not isinstance(system_type, str) or system_type not in {
+        "on_grid",
+        "hybrid",
+        "off_grid",
+    }:
         return jsonify({"error": "Invalid system_type"}), 400
+
+    system_kw, error = parse_number(
+        data.get("system_kw", 3),
+        "system_kw",
+        maximum=tariffs[state]["solar"]["max_capacity_kw"],
+    )
+    if error:
+        return jsonify({"error": error}), 400
 
     default_category = next(iter(tariffs[state]["categories"]))
     category = data.get("category", default_category)
-    if category not in tariffs[state]["categories"]:
+    if not isinstance(category, str) or category not in tariffs[state]["categories"]:
         return jsonify({"error": "Category not found"}), 404
 
     bill = calculate_bill(units, state, category)
@@ -207,12 +243,30 @@ def calculate():
 
 @app.route("/compare", methods=["POST"])
 def compare():
-    data = request.get_json(silent=True) or {}
-    units = int(data.get("units", 0))
-    states = data.get("states", list(tariffs.keys()))
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Request body must be a JSON object"}), 400
 
-    if units <= 0:
-        return jsonify({"error": "Units must be positive"}), 400
+    units, error = parse_number(
+        data.get("units"), "units", integer=True, maximum=config.MAX_UNITS
+    )
+    if error:
+        return jsonify({"error": error}), 400
+
+    states = data.get("states", list(tariffs.keys()))
+    if (
+        not isinstance(states, list)
+        or len(states) > config.MAX_COMPARE_STATES
+        or not all(isinstance(state, str) for state in states)
+    ):
+        return jsonify(
+            {
+                "error": (
+                    "states must be a list of at most "
+                    f"{config.MAX_COMPARE_STATES} state names"
+                )
+            }
+        ), 400
 
     comparison = []
     for state in states:
