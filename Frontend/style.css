@@ -113,7 +113,6 @@ body {
   background: transparent;
   color: var(--dark-blue);
   cursor: pointer;
-  font-family: "Urbanist", sans-serif;
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -501,8 +500,6 @@ select:focus {
 
 @media (max-width: 980px) {
   .header,
-  .section-hero,
-  .section-head,
   .compare-header {
     flex-direction: column;
     align-items: stretch;

@@ -37,10 +37,6 @@ function showTab(name) {
     if (activeTab) {
         activeTab.classList.add("active");
     }
-
-    if (name === "solar" && lastResult) {
-        renderSolarFull(lastResult);
-    }
 }
 
 function updateCategories() {

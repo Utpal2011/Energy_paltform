@@ -3,10 +3,12 @@ from flask_cors import CORS
 import json
 from pathlib import Path
 
-app = Flask(__name__)
-CORS(app)
-
 BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / "Frontend"
+
+# Serve the Frontend folder from the site root, so the whole app runs on one port.
+app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
+CORS(app)
 
 with open(BASE_DIR / "tariffs.json", encoding="utf-8") as f:
     tariffs = json.load(f)
@@ -121,6 +123,11 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "system_type": system_type,
         "message": subsidy_message,
     }
+
+
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
 
 
 @app.route("/states", methods=["GET"])
