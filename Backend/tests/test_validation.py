@@ -68,3 +68,20 @@ def test_oversized_body_rejected(client, payload):
     )
 
     assert response.status_code == 413
+
+
+HUGE_INT = "1" + "0" * 400  # parses as a Python int too big for float()
+
+
+@pytest.mark.parametrize(
+    "path, body",
+    [
+        ("/calculate", '{"units": %s}' % HUGE_INT),
+        ("/calculate", '{"units": 200, "state": "Gujarat", "system_kw": %s}' % HUGE_INT),
+        ("/compare", '{"units": %s}' % HUGE_INT),
+    ],
+)
+def test_huge_integers_rejected_not_crash(client, path, body):
+    response = client.post(path, data=body, content_type="application/json")
+
+    assert response.status_code == 400

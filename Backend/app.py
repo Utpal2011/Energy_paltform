@@ -24,7 +24,7 @@ def parse_number(value, name, integer=False, maximum=None):
         return None, f"{name} must be a number"
     try:
         number = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None, f"{name} must be a number"
     if not math.isfinite(number) or number <= 0:
         return None, f"{name} must be a positive number"
