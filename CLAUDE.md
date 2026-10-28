@@ -9,13 +9,14 @@ VoltIQ: a small web app for comparing Indian state electricity tariffs, computin
 ## Running
 
 ```bash
-pip install flask flask-cors
+# From the repo root
+pip install -r requirements.txt
 
-# API + frontend (http://127.0.0.1:5000, debug mode)
-cd Backend && python app.py
+# API + frontend: open http://127.0.0.1:5000 (debug mode)
+python Backend/app.py
 
-# Tests (from repo root)
-pip install pytest && python -m pytest Backend/tests -q
+# Tests
+python -m pytest Backend/tests -q
 ```
 
 `start.sh` does the same (bash only). The frontend calls the API with a relative base, so it only works when served by Flask, not by `python -m http.server`.

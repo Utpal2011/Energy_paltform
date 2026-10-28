@@ -28,17 +28,16 @@ Energy-platform/
 ## Run Locally
 
 1. Create and activate a Python virtual environment if needed.
-2. Install dependencies:
+2. Install dependencies (from the repo root):
 
 ```bash
-pip install flask flask-cors
+pip install -r requirements.txt
 ```
 
 3. Start the server (it serves both the API and the frontend):
 
 ```bash
-cd Backend
-python app.py
+python Backend/app.py
 ```
 
 4. Open:
@@ -50,7 +49,6 @@ http://127.0.0.1:5000
 ## Tests
 
 ```bash
-pip install pytest
 python -m pytest Backend/tests -q
 ```
 
