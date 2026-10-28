@@ -90,3 +90,35 @@ def test_compare_includes_losses(client):
 
     # PR and degradation lengthen payback beyond the old 3.7 years
     assert gujarat["solar_payback_years"] > 3.7
+
+
+def test_payback_reached_flag_true_for_normal_system(client, payload):
+    assert solar_for(client, payload)["payback_reached"] is True
+
+
+def test_payback_reached_flag_false_when_never_paid_back(client, payload, monkeypatch):
+    monkeypatch.setitem(tariffs["Gujarat"]["solar"], "cost_per_kw", 10_000_000)
+
+    solar = solar_for(client, payload)
+
+    assert solar["payback_reached"] is False
+
+
+def test_compare_reports_payback_reached(client, monkeypatch):
+    monkeypatch.setitem(tariffs["Gujarat"]["solar"], "cost_per_kw", 10_000_000)
+
+    response = client.post("/compare", json={"units": 200, "states": ["Gujarat", "Delhi"]})
+    rows = {row["state"]: row for row in response.get_json()["comparison"]}
+
+    assert rows["Gujarat"]["solar_payback_reached"] is False
+    assert rows["Delhi"]["solar_payback_reached"] is True
+
+
+def test_frontend_formats_unreached_payback():
+    from pathlib import Path
+
+    script = (Path(__file__).resolve().parents[2] / "Frontend" / "script.js").read_text(encoding="utf-8")
+
+    assert "Not within panel life" in script
+    assert "${solar.payback_years} yrs" not in script
+    assert "${item.solar_payback_years} years" not in script

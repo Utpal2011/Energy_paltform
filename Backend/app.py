@@ -172,7 +172,8 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
                 payback_years = round(year - 1 + max(0, fraction), 1)
         total_savings += year_savings
 
-    if payback_years is None:
+    payback_reached = payback_years is not None
+    if not payback_reached:
         payback_years = config.NO_PAYBACK_YEARS
     lifetime_savings = round(total_savings - net_cost, 2)
 
@@ -187,6 +188,7 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "monthly_savings": monthly_savings,
         "annual_savings": annual_savings,
         "payback_years": payback_years,
+        "payback_reached": payback_reached,
         "lifetime_savings": lifetime_savings,
         "export_income": export_income,
         "export_allowed": export_allowed,
@@ -336,6 +338,7 @@ def compare():
                 "total_bill": bill["total_bill"],
                 "effective_rate": bill["effective_rate"],
                 "solar_payback_years": solar["payback_years"],
+                "solar_payback_reached": solar["payback_reached"],
                 "solar_net_cost": solar["net_cost"],
                 "monthly_solar_savings": solar["monthly_savings"],
             }

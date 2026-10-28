@@ -112,6 +112,10 @@ async function calculate() {
     }
 }
 
+function formatPayback(years, reached) {
+    return reached ? `${years} yrs` : "Not within panel life";
+}
+
 function renderBillResult(data) {
     const bill = data.bill;
     const solar = data.solar;
@@ -135,7 +139,7 @@ function renderBillResult(data) {
     document.getElementById("solar-snapshot").innerHTML = `
         <div class="solar-item">
             <span class="solar-item-label">Payback Period</span>
-            <span class="solar-item-val">${solar.payback_years} yrs</span>
+            <span class="solar-item-val">${formatPayback(solar.payback_years, solar.payback_reached)}</span>
             <span class="solar-item-sub">Based on annual savings</span>
         </div>
         <div class="solar-item">
@@ -176,7 +180,7 @@ function renderSolarFull(data) {
             <div class="bill-breakdown">
                 <div class="bd-item"><span class="bd-label">Monthly Savings</span><span class="bd-val">Rs ${solar.monthly_savings.toLocaleString("en-IN")}</span></div>
                 <div class="bd-item"><span class="bd-label">Annual Savings</span><span class="bd-val">Rs ${solar.annual_savings.toLocaleString("en-IN")}</span></div>
-                <div class="bd-item"><span class="bd-label">Payback</span><span class="bd-val">${solar.payback_years} yrs</span></div>
+                <div class="bd-item"><span class="bd-label">Payback</span><span class="bd-val">${formatPayback(solar.payback_years, solar.payback_reached)}</span></div>
                 <div class="bd-item"><span class="bd-label">Lifetime Savings</span><span class="bd-val">Rs ${solar.lifetime_savings.toLocaleString("en-IN")}</span></div>
             </div>
             <p class="solar-item-sub">Includes ${Math.round((1 - solar.performance_ratio) * 100)}% system losses and ${solar.annual_degradation * 100}% panel degradation per year.</p>
@@ -210,7 +214,7 @@ async function compareStates() {
                 <div class="cc-bill">Rs ${item.total_bill.toLocaleString("en-IN")}</div>
                 <div class="cc-utility">DISCOM: ${item.utility}</div>
                 <div class="cc-rate">${item.category} | Rs ${item.effective_rate}/unit effective</div>
-                <div class="cc-solar">Solar payback: ${item.solar_payback_years} years</div>
+                <div class="cc-solar">Solar payback: ${formatPayback(item.solar_payback_years, item.solar_payback_reached)}</div>
                 <div class="cc-solar">Monthly solar savings: Rs ${item.monthly_solar_savings.toLocaleString("en-IN")}</div>
             </div>
         `).join("");
