@@ -15,7 +15,9 @@ VoltIQ is a web app for comparing electricity tariffs, estimating slab-wise bill
 Energy-platform/
 |-- Backend/
 |   |-- app.py
-|   `-- tariffs.json
+|   |-- config.py
+|   |-- tariffs.json
+|   `-- tests/
 |-- Frontend/
 |   |-- index.html
 |   |-- script.js
@@ -32,25 +34,32 @@ Energy-platform/
 pip install flask flask-cors
 ```
 
-3. Start the backend:
+3. Start the server (it serves both the API and the frontend):
 
 ```bash
 cd Backend
 python app.py
 ```
 
-4. Serve the frontend from another terminal:
-
-```bash
-cd Frontend
-python -m http.server 8080
-```
-
-5. Open:
+4. Open:
 
 ```text
-http://127.0.0.1:8080
+http://127.0.0.1:5000
 ```
+
+## Tests
+
+```bash
+pip install pytest
+python -m pytest Backend/tests -q
+```
+
+## Model Assumptions
+
+Tunable assumptions live in `Backend/config.py`: CO2 factors, the 0.80
+performance ratio, 0.5%/year panel degradation, PM Surya Ghar subsidy bands
+(residential on-grid/hybrid only, panels only), hybrid/off-grid cost
+multipliers (estimates), and request limits.
 
 ## API Endpoints
 
@@ -67,6 +76,7 @@ POST /calculate
   "units": 200,
   "state": "Gujarat",
   "category": "Residential (RGP)",
-  "system_kw": 3
+  "system_kw": 3,
+  "system_type": "on_grid"
 }
 ```

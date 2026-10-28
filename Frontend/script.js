@@ -1,4 +1,5 @@
-const API = "http://127.0.0.1:5000";
+// Same origin: Flask serves both the page and the API.
+const API = "";
 
 let statesData = {};
 let lastResult = null;
@@ -56,7 +57,7 @@ function updateCategories() {
 function updateSubsidyWarning() {
     const systemType = document.getElementById("system_type").value;
     const warningElement = document.getElementById("subsidy-warning");
-    const showWarning = systemType === "hybrid" || systemType === "off_grid";
+    const showWarning = systemType === "off_grid";
     warningElement.classList.toggle("hidden", !showWarning);
 }
 
@@ -144,8 +145,8 @@ function renderBillResult(data) {
         </div>
         <div class="solar-item">
             <span class="solar-item-label">Export Income</span>
-            <span class="solar-item-val">Rs ${solar.export_income.toLocaleString("en-IN")}</span>
-            <span class="solar-item-sub">Monthly export potential</span>
+            <span class="solar-item-val">${solar.export_allowed ? `Rs ${solar.export_income.toLocaleString("en-IN")}` : "Not available"}</span>
+            <span class="solar-item-sub">${solar.export_allowed ? "Monthly export potential" : "Needs net metering and a grid-tied system"}</span>
         </div>
         <div class="solar-item">
             <span class="solar-item-label">Trees Equivalent</span>
@@ -163,11 +164,12 @@ function renderSolarFull(data) {
         <div class="card">
             <div class="panel-title">Installation Economics</div>
             <div class="bill-breakdown">
-                <div class="bd-item"><span class="bd-label">Gross Cost</span><span class="bd-val">Rs ${solar.gross_cost.toLocaleString("en-IN")}</span></div>
+                <div class="bd-item"><span class="bd-label">Gross Cost${solar.cost_is_estimate ? " (estimate)" : ""}</span><span class="bd-val">Rs ${solar.gross_cost.toLocaleString("en-IN")}</span></div>
                 <div class="bd-item"><span class="bd-label">Subsidy</span><span class="bd-val">Rs ${solar.subsidy.toLocaleString("en-IN")}</span></div>
                 <div class="bd-item"><span class="bd-label">Net Cost</span><span class="bd-val">Rs ${solar.net_cost.toLocaleString("en-IN")}</span></div>
                 <div class="bd-item"><span class="bd-label">Recommendation</span><span class="bd-val">${solar.recommendation}</span></div>
             </div>
+            <p class="solar-item-sub">${solar.cost_note}</p>
         </div>
         <div class="card">
             <div class="panel-title">Long-Term Returns</div>
@@ -177,6 +179,7 @@ function renderSolarFull(data) {
                 <div class="bd-item"><span class="bd-label">Payback</span><span class="bd-val">${solar.payback_years} yrs</span></div>
                 <div class="bd-item"><span class="bd-label">Lifetime Savings</span><span class="bd-val">Rs ${solar.lifetime_savings.toLocaleString("en-IN")}</span></div>
             </div>
+            <p class="solar-item-sub">Includes ${Math.round((1 - solar.performance_ratio) * 100)}% system losses and ${solar.annual_degradation * 100}% panel degradation per year.</p>
         </div>
     `;
 
