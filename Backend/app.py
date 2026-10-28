@@ -99,10 +99,27 @@ def calculate_subsidy(system_kw, category, system_type, solar):
     return min(band_amount, panel_cost)
 
 
+def monthly_solar_savings(generation, units, state, category, export_rate):
+    """Bill reduction plus export income for one month of generation.
+
+    export_rate is 0 when the system cannot export.
+    """
+    self_consumed = min(units, generation)
+    surplus_units = max(0, generation - units)
+    bill_without_solar = calculate_bill(units, state, category)["total_bill"]
+    bill_with_solar = calculate_bill(
+        max(0, units - int(self_consumed)), state, category
+    )["total_bill"]
+    export_income = surplus_units * export_rate
+    return bill_without_solar - bill_with_solar + export_income, export_income
+
+
 def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
     solar = tariffs[state]["solar"]
     avg_sun_hours = solar["avg_sun_hours"]
-    monthly_generation = system_kw * avg_sun_hours * config.DAYS_PER_MONTH
+    monthly_generation = (
+        system_kw * avg_sun_hours * config.DAYS_PER_MONTH * config.PERFORMANCE_RATIO
+    )
 
     cost_per_kw = solar["cost_per_kw"]
     cost_multiplier = config.COST_MULTIPLIER[system_type]
@@ -128,30 +145,36 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
 
     net_cost = round(gross_cost - subsidy, 2)
 
-    self_consumed = min(units, monthly_generation)
-    surplus_units = max(0, monthly_generation - units)
     export_allowed = (
         solar["net_metering"] and system_type in config.EXPORT_ELIGIBLE_TYPES
     )
-    export_income = (
-        round(surplus_units * solar["export_rate"], 2) if export_allowed else 0
+    export_rate = solar["export_rate"] if export_allowed else 0
+
+    first_month_savings, export_income = monthly_solar_savings(
+        monthly_generation, units, state, category, export_rate
     )
-
-    bill_without_solar = calculate_bill(units, state, category)["total_bill"]
-    bill_with_solar = calculate_bill(
-        max(0, units - int(self_consumed)), state, category
-    )["total_bill"]
-
-    monthly_savings = round(bill_without_solar - bill_with_solar + export_income, 2)
+    monthly_savings = round(first_month_savings, 2)
+    export_income = round(export_income, 2)
     annual_savings = round(monthly_savings * 12, 2)
-    payback_years = (
-        round(net_cost / annual_savings, 1)
-        if annual_savings > 0
-        else config.NO_PAYBACK_YEARS
-    )
-    lifetime_savings = round(
-        annual_savings * solar["panel_life_years"] - net_cost, 2
-    )
+
+    # Walk the panel life year by year as output degrades.
+    total_savings = 0
+    payback_years = None
+    for year in range(1, solar["panel_life_years"] + 1):
+        generation = monthly_generation * (1 - config.ANNUAL_DEGRADATION) ** (year - 1)
+        year_savings = (
+            monthly_solar_savings(generation, units, state, category, export_rate)[0]
+            * 12
+        )
+        if payback_years is None and year_savings > 0:
+            if total_savings + year_savings >= net_cost:
+                fraction = (net_cost - total_savings) / year_savings
+                payback_years = round(year - 1 + max(0, fraction), 1)
+        total_savings += year_savings
+
+    if payback_years is None:
+        payback_years = config.NO_PAYBACK_YEARS
+    lifetime_savings = round(total_savings - net_cost, 2)
 
     return {
         "system_kw": system_kw,
@@ -168,6 +191,8 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "export_income": export_income,
         "export_allowed": export_allowed,
         "export_rate": solar["export_rate"],
+        "performance_ratio": config.PERFORMANCE_RATIO,
+        "annual_degradation": config.ANNUAL_DEGRADATION,
         "co2_saved_kg_monthly": round(monthly_generation * config.CO2_KG_PER_KWH, 2),
         "net_metering": solar["net_metering"],
         "avg_sun_hours": avg_sun_hours,

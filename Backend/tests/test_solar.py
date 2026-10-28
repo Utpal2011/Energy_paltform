@@ -49,3 +49,44 @@ def test_gross_cost_scales_by_system_type(client, payload, system_type, gross, n
     assert solar["net_cost"] == net
     assert solar["cost_is_estimate"] is is_estimate
     assert ("estimate" in solar["cost_note"].lower()) is is_estimate
+
+
+def test_generation_includes_system_losses(client, payload):
+    solar = solar_for(client, payload)
+
+    # 3 kW x 5.5 h x 30 days x 0.80 performance ratio
+    assert solar["monthly_generation_units"] == 396.0
+    assert solar["performance_ratio"] == 0.80
+    assert solar["annual_degradation"] == 0.005
+
+
+def test_degradation_reduces_lifetime_savings(client, payload):
+    solar = solar_for(client, payload)
+
+    no_degradation = solar["annual_savings"] * 25 - solar["net_cost"]
+    assert solar["lifetime_savings"] < no_degradation
+
+
+def test_without_degradation_matches_simple_model(client, payload, monkeypatch):
+    import config
+
+    monkeypatch.setattr(config, "ANNUAL_DEGRADATION", 0)
+    solar = solar_for(client, payload)
+
+    expected_lifetime = solar["annual_savings"] * 25 - solar["net_cost"]
+    assert solar["lifetime_savings"] == pytest.approx(expected_lifetime, abs=1)
+    assert solar["payback_years"] == round(solar["net_cost"] / solar["annual_savings"], 1)
+
+
+def test_payback_never_reached_reports_no_payback(client, payload, monkeypatch):
+    monkeypatch.setitem(tariffs["Gujarat"]["solar"], "cost_per_kw", 10_000_000)
+
+    assert solar_for(client, payload)["payback_years"] == 99
+
+
+def test_compare_includes_losses(client):
+    response = client.post("/compare", json={"units": 200, "states": ["Gujarat"]})
+    gujarat = response.get_json()["comparison"][0]
+
+    # PR and degradation lengthen payback beyond the old 3.7 years
+    assert gujarat["solar_payback_years"] > 3.7

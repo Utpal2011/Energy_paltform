@@ -10,6 +10,8 @@ CO2_KG_PER_TREE = 21.7  # CO2 absorbed by one mature tree per year
 
 # Solar generation
 DAYS_PER_MONTH = 30
+PERFORMANCE_RATIO = 0.80  # inverter, wiring, heat and soiling losses
+ANNUAL_DEGRADATION = 0.005  # panel output lost per year
 
 # /compare uses one fixed system size for every state
 COMPARE_SYSTEM_KW = 3
