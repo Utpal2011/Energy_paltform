@@ -79,14 +79,24 @@ def calculate_bill(units, state, category):
     }
 
 
-def calculate_subsidy(system_kw):
-    if system_kw >= 3:
-        return 78000
-    if system_kw >= 2:
-        return 60000
-    if system_kw >= 1:
-        return 30000
-    return 0
+def is_subsidy_category(category):
+    return config.SUBSIDY_CATEGORY_KEYWORD in category.lower()
+
+
+def calculate_subsidy(system_kw, category, system_type, solar):
+    if system_type not in config.SUBSIDY_ELIGIBLE_TYPES:
+        return 0
+    if not is_subsidy_category(category):
+        return 0
+
+    eligible_kw = min(system_kw, solar["subsidy_max_kw"])
+    band_amount = next(
+        (amount for min_kw, amount in config.SUBSIDY_BANDS if eligible_kw >= min_kw),
+        0,
+    )
+    # Only the panels are subsidised, never the battery.
+    panel_cost = system_kw * solar["cost_per_kw"]
+    return min(band_amount, panel_cost)
 
 
 def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
@@ -97,15 +107,15 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
     cost_per_kw = solar["cost_per_kw"]
     gross_cost = system_kw * cost_per_kw
 
-    # PM Surya Ghar Muft Bijli Yojana subsidy is only available for
-    # grid-connected rooftop systems. Hybrid and off-grid systems are
-    # not eligible under this scheme. Subsidy is capped at 3 kW.
-    if system_type == "on_grid":
-        subsidy = calculate_subsidy(system_kw)
-        subsidy_message = "Government subsidy applied for on-grid rooftop solar."
-    else:
-        subsidy = 0
+    subsidy = calculate_subsidy(system_kw, category, system_type, solar)
+    if system_type not in config.SUBSIDY_ELIGIBLE_TYPES:
         subsidy_message = f"Subsidy not applicable for {system_type} systems."
+    elif not is_subsidy_category(category):
+        subsidy_message = "Subsidy applies only to residential connections."
+    elif subsidy == 0:
+        subsidy_message = "Subsidy requires a system of at least 1 kW."
+    else:
+        subsidy_message = "PM Surya Ghar subsidy applied (panels only, not battery)."
 
     net_cost = round(gross_cost - subsidy, 2)
 

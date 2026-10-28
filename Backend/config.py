@@ -21,3 +21,9 @@ NO_PAYBACK_YEARS = 99
 MAX_UNITS = 100000  # kWh per month
 MAX_COMPARE_STATES = 50
 MAX_REQUEST_BYTES = 16 * 1024
+
+# PM Surya Ghar Muft Bijli Yojana: fixed amount by system size (kW, rupees),
+# largest band first. Battery cost is never subsidised.
+SUBSIDY_BANDS = [(3, 78000), (2, 60000), (1, 30000)]
+SUBSIDY_ELIGIBLE_TYPES = {"on_grid", "hybrid"}
+SUBSIDY_CATEGORY_KEYWORD = "residential"
