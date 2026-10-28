@@ -31,3 +31,7 @@ SUBSIDY_CATEGORY_KEYWORD = "residential"
 # Surplus can be sold to the grid only by grid-tied systems, and only
 # where the state allows net metering.
 EXPORT_ELIGIBLE_TYPES = {"on_grid", "hybrid"}
+
+# Installed cost relative to an on-grid system of the same size. Hybrid and
+# off-grid include batteries; these multipliers are estimates, not quotes.
+COST_MULTIPLIER = {"on_grid": 1.0, "hybrid": 1.5, "off_grid": 1.8}

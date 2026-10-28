@@ -32,3 +32,20 @@ def test_no_export_income_without_net_metering(client, payload, monkeypatch):
 
     assert solar["export_allowed"] is False
     assert solar["export_income"] == 0
+
+
+@pytest.mark.parametrize(
+    "system_type, gross, net, is_estimate",
+    [
+        ("on_grid", 165000, 87000, False),
+        ("hybrid", 247500, 169500, True),  # 1.5x panels; battery unsubsidised
+        ("off_grid", 297000, 297000, True),  # 1.8x panels; no subsidy
+    ],
+)
+def test_gross_cost_scales_by_system_type(client, payload, system_type, gross, net, is_estimate):
+    solar = solar_for(client, payload, system_type=system_type)
+
+    assert solar["gross_cost"] == gross
+    assert solar["net_cost"] == net
+    assert solar["cost_is_estimate"] is is_estimate
+    assert ("estimate" in solar["cost_note"].lower()) is is_estimate

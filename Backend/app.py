@@ -105,7 +105,16 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
     monthly_generation = system_kw * avg_sun_hours * config.DAYS_PER_MONTH
 
     cost_per_kw = solar["cost_per_kw"]
-    gross_cost = system_kw * cost_per_kw
+    cost_multiplier = config.COST_MULTIPLIER[system_type]
+    gross_cost = round(system_kw * cost_per_kw * cost_multiplier, 2)
+    cost_is_estimate = cost_multiplier != 1.0
+    if cost_is_estimate:
+        cost_note = (
+            f"Estimate: {system_type} cost includes a battery, "
+            f"taken as {cost_multiplier}x the on-grid cost."
+        )
+    else:
+        cost_note = "Based on the state's average installed cost per kW."
 
     subsidy = calculate_subsidy(system_kw, category, system_type, solar)
     if system_type not in config.SUBSIDY_ELIGIBLE_TYPES:
@@ -148,6 +157,8 @@ def solar_analysis(units, state, category, system_kw=3, system_type="on_grid"):
         "system_kw": system_kw,
         "monthly_generation_units": round(monthly_generation, 1),
         "gross_cost": gross_cost,
+        "cost_is_estimate": cost_is_estimate,
+        "cost_note": cost_note,
         "subsidy": round(subsidy, 2),
         "net_cost": net_cost,
         "monthly_savings": monthly_savings,
